@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>WBGT ISHIZUCHI</title>
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; font-family: sans-serif; overflow: hidden; }
+        :root { --accent: #00ccff; }
+        .status-danger { --accent: #ff0000; }
+        .status-warning { --accent: #ffaa00; }
+        .status-safe { --accent: #00ccff; }
+        .container { width: 95vw; height: 95vh; max-width: 1000px; max-height: 1100px; display: flex; flex-direction: column; border: 8px solid var(--accent); box-sizing: border-box; }
+        .header { background: var(--accent); color: #000; font-size: 4.5vw; font-weight: bold; padding: 20px; text-align: center; }
+        .main-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .wbgt-label { font-size: 2.5rem; color: #888; }
+        .wbgt-value { font-size: 20vw; font-weight: bold; line-height: 1; }
+        .wbgt-unit { font-size: 8vw; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; background: #111; padding: 30px; gap: 20px; }
+        .info-item { border-left: 15px solid var(--accent); padding-left: 20px; }
+        .label { font-size: 1.8rem; color: #888; display: block; }
+        .value { font-size: 4rem; font-weight: bold; }
+        .footer { padding: 15px; font-size: 1.5rem; color: #555; text-align: right; }
+    </style>
+</head>
+<body id="status-body" class="status-safe">
+<div class="container">
+    <div class="header" id="header-text">石鎚H.O.：第4駐車場</div>
+    <div class="main-display">
+        <div class="wbgt-label">暑さ指数 (WBGT)</div>
+        <div class="wbgt-value" id="wbgt-val">--<span class="wbgt-unit">℃</span></div>
+    </div>
+    <div class="info-grid">
+        <div class="info-item"><span class="label">気温</span><span class="value" id="temp-val">--.-℃</span></div>
+        <div class="info-item"><span class="label">天気</span><span class="value" id="weather-val">--</span></div>
+        <div class="info-item"><span class="label">風向</span><span class="value" id="wind-dir-val">--</span></div>
+        <div class="info-item"><span class="label">風速</span><span class="value" id="wind-spd-val">--m/s</span></div>
+    </div>
+    <div class="footer" id="update-time">更新待機中</div>
+</div>
+<script>
+    async function update() {
+        try {
+            const r = await fetch('data.json?t=' + Date.now());
+            const d = await r.json();
+            document.getElementById('wbgt-val').innerHTML = d.wbgt + '<span class="wbgt-unit">℃</span>';
+            document.getElementById('temp-val').innerText = d.temp + '℃';
+            document.getElementById('weather-val').innerText = d.weather;
+            document.getElementById('wind-dir-val').innerText = d.wind_dir;
+            document.getElementById('wind-spd-val').innerText = d.wind_speed + 'm/s';
+            document.getElementById('update-time').innerText = '最終更新: ' + d.updated;
+            const v = parseFloat(d.wbgt);
+            const b = document.getElementById('status-body');
+            const h = document.getElementById('header-text');
+            if(v >= 31) { b.className='status-danger'; h.innerText='石鎚H.O.：【危険】作業中止'; }
+            else if(v >= 28) { b.className='status-warning'; h.innerText='石鎚H.O.：【厳重警戒】'; }
+            else { b.className='status-safe'; h.innerText='石鎚H.O.：第4駐車場'; }
+        } catch(e) {}
+    }
+    setInterval(update, 30000);
+    update();
+</script>
+</body>
+</html>
